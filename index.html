@@ -126,12 +126,12 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            padding: 80px 20px;
+            padding: 160px 20px 80px;
         }
 
         .letter-container {
             width: 100%;
-            max-width: 580px;
+            max-width: 680px;
             min-height: 400px;
             padding: 40px;
             display: flex;
@@ -144,7 +144,7 @@
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             background: rgba(10, 17, 40, 0.4);
-            padding: 30px;
+            padding: 35px 40px;
             border-radius: 15px;
         }
 
@@ -157,7 +157,7 @@
             font-size: 32px;
             font-weight: 400;
             color: #f8f9fa;
-            text-align: justify;
+            text-align: center;
             line-height: 1.9;
             letter-spacing: 0.5px;
         }
@@ -167,9 +167,9 @@
             font-size: 19px;
             font-weight: 400;
             color: #f8f9fa;
-            text-align: justify;
-            line-height: 1.9;
-            letter-spacing: 0.5px;
+            text-align: left;
+            line-height: 1.8;
+            letter-spacing: 0.3px;
         }
 
         .signature {
@@ -177,7 +177,7 @@
             font-size: 24px;
             font-weight: 400;
             color: #f8f9fa;
-            text-align: justify;
+            text-align: center;
             line-height: 1.9;
             letter-spacing: 0.5px;
         }
@@ -210,6 +210,41 @@
             text-align: center;
             margin-top: 24px;
             opacity: 0.6;
+        }
+
+        /* Back Button */
+        .back-button {
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            color: #f8f9fa;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 24px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .back-button:active {
+            transform: translateY(0);
+        }
+
+        .back-button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .back-button:disabled:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: none;
         }
 
         /* Animations */
@@ -259,12 +294,17 @@
         }
 
         @media (max-width: 640px) {
+            .content-wrapper {
+                padding: 160px 15px 60px;
+            }
+            
             .letter-container {
-                padding: 30px 25px;
+                padding: 20px 15px;
+                max-width: 100%;
             }
             
             .text-content {
-                padding: 25px 20px;
+                padding: 30px 25px;
             }
             
             .heading {
@@ -272,26 +312,38 @@
             }
             
             .body-text {
-                font-size: 18px;
+                font-size: 16px;
+                line-height: 1.7;
+                text-align: left;
             }
             
             .signature {
                 font-size: 22px;
             }
+            
+            .moon-container {
+                top: 40px;
+            }
+            
+            .moon {
+                width: 70px;
+                height: 70px;
+            }
         }
     </style>
 </head>
-<body></body>
+<body>
     <audio id="bg-music" loop style="display:none;">
         <source src="seasons.mp3" type="audio/mpeg">
-      </audio>
+    </audio>
     
-      <script>
+    <script>
         document.body.addEventListener('click', () => {
-          const audio = document.getElementById('bg-music');
-          audio.play();
-        }, { once: true }); // biar cuma klik pertama aja yang aktifin
-      </script>
+            const audio = document.getElementById('bg-music');
+            audio.play();
+        }, { once: true });
+    </script>
+
     <div class="container">
         <!-- Background -->
         <div class="gradient-bg"></div>
@@ -324,6 +376,11 @@
 
                 <!-- Tap Hint -->
                 <p class="tap-hint" id="tapHint">Tap moon to continue</p>
+                
+                <!-- Back Button -->
+                <div style="display: flex; justify-content: center; margin-top: 16px;">
+                    <button id="backButton" class="back-button">Back</button>
+                </div>
             </div>
         </div>
     </div>
@@ -442,6 +499,7 @@
             updateProgressDots();
             updateTapHint();
             updateMoonOpacity();
+            updateBackButton();
         }
 
         // Update moon opacity
@@ -454,6 +512,32 @@
                 moon.style.opacity = '0.5';
                 moon.style.cursor = 'default';
             }
+        }
+
+        // Update back button state
+        function updateBackButton() {
+            const backButton = document.getElementById('backButton');
+            if (currentParagraph === 0) {
+                backButton.disabled = true;
+            } else {
+                backButton.disabled = false;
+            }
+        }
+
+        // Handle back
+        function handleBack() {
+            if (isAnimating || currentParagraph <= 0) return;
+            
+            isAnimating = true;
+            const textContent = document.getElementById('textContent');
+            textContent.classList.add('fade-out');
+            
+            setTimeout(() => {
+                currentParagraph--;
+                updateContent();
+                textContent.classList.remove('fade-out');
+                isAnimating = false;
+            }, 300);
         }
 
         // Handle next
@@ -477,6 +561,10 @@
             generateStars();
             initProgressDots();
             updateMoonOpacity();
+            updateBackButton();
+            
+            // Add back button event listener
+            document.getElementById('backButton').addEventListener('click', handleBack);
             
             // Create shooting stars periodically
             setInterval(createShootingStar, 18000);
